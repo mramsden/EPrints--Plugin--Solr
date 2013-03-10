@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+<!DOCTYPE phrases SYSTEM "entities.dtd">
+
+<epp:phrases xmlns="http://www.w3.org/1999/xhtml" xmlns:epp="http://eprints.org/ep3/phrase" xmlns:epc="http://eprints.org/ep3/control">
+<epp:phrase id="Plugin/Screen/SOLR_integration:title">SOLR integration</epp:phrase>
+<epp:phrase id="Plugin/Screen/SOLR_integration:description">This is a plugin for the EPrints open source repository software that provides integration with a Solr server.</epp:phrase>
+<epp:phrase id="Plugin/Screen/SOLR_integration:ping">Ping SOLR server</epp:phrase>
+<epp:phrase id="Plugin/Screen/SOLR_integration:site_no_response">Something is wrong with your SOLR server. Please check your configuration</epp:phrase>
+<epp:phrase id="Plugin/Screen/SOLR_integration:site_responded">Yous SOLR server is up and responding</epp:phrase>
+<epp:phrase id="Plugin/Screen/EPMC/SOLR_integration:error:solr_url_not_configured">SOLR server not configured!</epp:phrase>
+<epp:phrase id="Plugin/Screen/EPMC/SOLR_integration:error:solr_core_not_configured">SOLR core not configured!</epp:phrase>
+<epp:phrase id="Plugin/Screen/EPMC/SOLR_integration:error:solr_search_missing">You need to install Apache::Solr in order to run the plugin</epp:phrase>
+<epp:phrase id="Plugin/Screen/EPMC/SOLR_integration:ready">SOLR integration installed correctly!</epp:phrase>
+</epp:phrases>
