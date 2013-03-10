@@ -8,16 +8,16 @@ use strict;
 
 sub new
 {
-my( $class, %params ) = @_;
+      my( $class, %params ) = @_;
 
-my $self = $class->SUPER::new( %params );
+      my $self = $class->SUPER::new( %params );
 
-$self->{actions} = [qw( enable disable configure )];
-$self->{disable} = 0; # always enabled, even in lib/plugins
+      $self->{actions} = [qw( enable disable configure )];
+      $self->{disable} = 0; # always enabled, even in lib/plugins
 
-$self->{package_name} = "SOLR_integration";
+      $self->{package_name} = "SOLR_integration";
 
-return $self;
+      return $self;
 }
 
 =item $screen->action_enable( [ SKIP_RELOAD ] )
@@ -31,71 +31,93 @@ If SKIP_RELOAD is true will not reload the repository configuration.
 
 sub action_enable
 {
-my( $self, $skip_reload ) = @_;
+	my( $self, $skip_reload ) = @_;
 
-$self->SUPER::action_enable( $skip_reload );
-$self->reload_config if !$skip_reload;
+     	$self->SUPER::action_enable( $skip_reload );
+ 
+	$self->reload_config if !$skip_reload;
 }
 
 sub action_disable
 {
-my( $self, $skip_reload ) = @_;
+	my( $self, $skip_reload ) = @_;
 
-$self->SUPER::action_disable( $skip_reload );
+      	$self->SUPER::action_disable( $skip_reload );
 
-my $repo = $self->{repository};
+	my $repo = $self->{repository};
 }
 
 sub render_messages
 {
-my( $self ) = @_;
+	my( $self ) = @_;
 
-my $repo = $self->{repository};
+	my $repo = $self->{repository};
 
-my $epm = $self->{processor}->{dataobj};
+	my $epm = $self->{processor}->{dataobj};
 
-my $xml = $repo->xml;
+	my $xml = $repo->xml;
 
-my $frag = $xml->create_document_fragment;
+	my $frag = $xml->create_document_fragment;
 
-return $frag if (!$epm->is_enabled());
+	return $frag if (!$epm->is_enabled());
 
-#my $youtube_dl = $repository->get_conf( 'executables', 'youtube-dl' );
-#my $youtube_dl = $repo->get_conf( "executables", "youtubedl" );
+	my $solr_url = $self->{session}->get_repository->get_conf( 'solr_url' );
+	
+	my $solr_core = $self->{session}->get_repository->get_conf( 'solr_core' );
+	
+	my $conf_ok = 1;
 
-#if (!defined($youtube_dl) || (!-e $youtube_dl)) {
-# $frag->appendChild( $repo->render_message( 'error', $self->html_phrase( 'error:not_configured' ) ) );
-# return $frag;
-#}
-#$frag->appendChild( $repo->render_message( 'message', $self->html_phrase( 'ready' ) ) );
-return $frag;
+	if (!defined($solr_url)) {
+#		$frag->appendChild( $repo->render_message( 'error', $xml->create_text_node( $solr_url ) ) );
+		$frag->appendChild( $repo->render_message( 'error', $self->html_phrase( 'error:solr_url_not_configured' ) ) );
+		$conf_ok = 0;
+	}
+	if (!defined($solr_core)) {
+#		$frag->appendChild( $repo->render_message( 'error', $xml->create_text_node( $solr_core ) ) );
+		$frag->appendChild( $repo->render_message( 'error', $self->html_phrase( 'error:solr_core_not_configured' ) ) );
+		$conf_ok = 0;
+	}
+#	if ( !exists( "Search::Solr" ) ) {
+#	if( !exists( "Search::Solr") ) {
+#		$frag->appendChild( $repo->render_message( 'error', $self->html_phrase( 'error:solr_search_missing' ) ) );
+#		$conf_ok = 0;
+		#TODO
+		# automatically disable the plugin in a clean way
+		# $self->SUPER::action_disable( 0 );
+#	}
+	if( $conf_ok ) {
+            $frag->appendChild( $repo->render_message( 'message', $self->html_phrase( 'ready' ) ) );
+	}	
+	return $frag;
 }
 
 sub allow_configure { shift->can_be_viewed( @_ ) }
 
 sub action_configure
 {
-my( $self ) = @_;
+	my( $self ) = @_;
 
-my $epm = $self->{processor}->{dataobj};
-my $epmid = $epm->id;
+	my $epm = $self->{processor}->{dataobj};
+	my $epmid = $epm->id;
 
-foreach my $file ($epm->installed_files)
-{
-my $filename = $file->value( "filename" );
-next if $filename !~ m#^epm/$epmid/cfg/cfg\.d/(.*)#;
-my $url = $self->{repository}->current_url( host => 1 );
-$url->query_form(
-screen => "Admin::Config::View::Perl",
-configfile => "cfg.d/solr.pl",
-);
-$self->{repository}->redirect( $url );
-exit( 0 );
+	foreach my $file ($epm->installed_files)
+	{
+		my $filename = $file->value( "filename" );
+		next if $filename !~ m#^epm/$epmid/cfg/cfg\.d/(.*)#;
+		my $url = $self->{repository}->current_url( host => 1 );
+		$url->query_form(
+			screen => "Admin::Config::View::Perl",
+			configfile => "cfg.d/SOLR_integration.pl",
+		);
+		$self->{repository}->redirect( $url );
+		exit( 0 );
+	}
+
+	$self->{processor}->{screenid} = "Admin::EPM";
+
+	$self->{processor}->add_message( "error", $self->html_phrase( "missing" ) );
 }
 
-$self->{processor}->{screenid} = "Admin::EPM";
 
-$self->{processor}->add_message( "error", $self->html_phrase( "missing" ) );
-}
 
 1;
